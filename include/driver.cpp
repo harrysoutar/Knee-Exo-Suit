@@ -1,0 +1,68 @@
+#include "driver.h"
+
+
+driver::driver(int pwm_1, int pwm_2, int dir_1, int dir_2, long stepsPerRev){
+    _pins.push_back(pwm_1);
+    _pins.push_back(pwm_2);
+    _pins.push_back(dir_1);
+    _pins.push_back(dir_2);
+    _stepsPerRev = stepsPerRev;
+    
+    for(int i = 0; i < 4; i++){
+        pinMode(_pins[i], OUTPUT);
+    }
+}
+
+void driver::set_speed(long stepsPerSecond) {_stepsPerSecond = stepsPerSecond; }
+
+
+
+//This function coordinates the required direction 1, 2
+//and PWM 1 & 2 digital values to step the motor by 'steps'
+
+void driver::step(int steps){
+    //initialise vector of connected pins.
+
+
+
+    if(steps > 0){
+        _direction = true; //true for motion in positive direction (dependant on chosen motor & wire config)
+    }
+    else if(steps < 0){
+        _direction = false; //false for motion in negative direction.
+    }
+
+    _stepsLeft = steps - _stepsMoved;
+
+    while(abs(_stepsLeft > 0)){
+        if(_direction){
+
+            //phase 0.5
+            digitalWrite(_pins[0], 1);
+            for(int i = 1; i < 4; i++){
+                digitalWrite(_pins[i], 0);
+            }
+
+            delay(2);
+
+            //phase 1
+            digitalWrite(_pins[1], 1);
+
+            delay(2);
+
+            //phase 1.5
+            digitalWrite(_pins[0], 0);
+            digitalWrite(_pins[1], 0);
+            digitalWrite(_pins[2], 1);
+            digitalWrite(_pins[3], 1);
+
+            delay(2);
+
+            //phase 2
+            digitalWrite(_pins[2], 0);
+
+            delay(2);
+        }
+    }
+}
+
