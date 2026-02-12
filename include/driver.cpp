@@ -22,6 +22,7 @@ void driver::set_speed(long stepsPerSecond) {_stepsPerSecond = stepsPerSecond; }
 
 void driver::step(int steps){
     //initialise vector of connected pins.
+    _stepsMoved = 0;
 
 
 
@@ -32,9 +33,8 @@ void driver::step(int steps){
         _direction = false; //false for motion in negative direction.
     }
 
-    _stepsLeft = steps - _stepsMoved;
-
     while(abs(_stepsLeft > 0)){
+
         if(_direction){
 
             //phase 0.5
@@ -42,11 +42,16 @@ void driver::step(int steps){
             for(int i = 1; i < 4; i++){
                 digitalWrite(_pins[i], 0);
             }
+            _stepsMoved++;
+            _stepsLeft = steps - _stepsMoved;
 
             delay(2);
 
             //phase 1
             digitalWrite(_pins[1], 1);
+
+            _stepsMoved++;
+            _stepsLeft = steps - _stepsMoved;
 
             delay(2);
 
@@ -56,13 +61,23 @@ void driver::step(int steps){
             digitalWrite(_pins[2], 1);
             digitalWrite(_pins[3], 1);
 
+            _stepsMoved++;
+            _stepsLeft = steps - _stepsMoved;
+
             delay(2);
 
             //phase 2
             digitalWrite(_pins[2], 0);
 
+            _stepsMoved++;
+            _stepsLeft = steps - _stepsMoved;
+
             delay(2);
         }
+
+        if(!_direction){
+
+        }   
     }
 }
 
