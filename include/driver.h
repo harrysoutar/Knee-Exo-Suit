@@ -9,15 +9,14 @@ class driver{
 
     driver(int Pin_A, int Pin_B, int Pin_C, int Pin_D, long stepsPerRev);
     void set_speed(long stepsPerSecond);
-    void step(int steps);
+    int step(int steps);
 
     private:
     long _stepsPerRev;
-    long _stepsPerSecond;
+    long _stepDelay;
     std::vector<int> _pins;
     bool _direction;
     int _stepsLeft;
     int _stepsMoved;
 };
-
 #endif
