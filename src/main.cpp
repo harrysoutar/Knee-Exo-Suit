@@ -1,5 +1,6 @@
 #include "driver.h"
 #include <Wire.h>
+#include "DFRobot_ADXL345.cpp"
 
 //ADXL345 Definitions:
 #define X_Reg1 0x32
@@ -9,55 +10,37 @@
 #define Z_Reg1 0x36
 #define Z_Reg2 0x37
 #define PWR_CTL 0x2D
+#define cs_pin 10
 
 int X0;
 int X1;
 
 driver stepper(4, 5, 3, 6, 200);
+DFRobot_ADXL345_I2C ADXL345_thigh(&Wire,0x53);
+DFRobot_ADXL345_I2C ADXL345_calf(&Wire,0x1D);
 
-std::vector<int> get_adx();
+int accval_thigh[3];
+int accval_calf[3];
+
 
 void setup() {
   Serial.begin(9600);
-  Wire.begin();
-  delay(50);
-  Wire.beginTransmission(0x53);
-  Wire.write(PWR_CTL);
-  Wire.write(8);
-  Wire.endTransmission();
-  pinMode(10, OUTPUT);
+  ADXL345_thigh.begin();
+  ADXL345_thigh.powerOn();
+  ADXL345_calf.begin();
+  ADXL345_calf.powerOn();
 }
 
 void loop() {
-  digitalWrite(10, 1);
-  Wire.beginTransmission(0x53);
-  Wire.write(X_Reg1);
-  Wire.write(X_Reg2);
-  Wire.endTransmission();
-  Wire.requestFrom(0x53, 2);
-  if(Wire.available() <= 2){
-    X0 = Wire.read();
-    X1 = Wire.read();
-  }
-  Serial.print("X0=");
-  Serial.print(X0);
-  Serial.print("X1=");
-  Serial.println(X1);
-}
+  ADXL345_thigh.readAccel(accval_thigh);
+  ADXL345_calf.readAccel(accval_calf);
+  ADXL345_thigh.RPCalculate(accval_thigh);
+  ADXL345_calf.RPCalculate(accval_calf);
 
-std::vector<int> get_adx(){
-  std::vector<int> vals;
-  Wire.beginTransmission(0x53);
-  Wire.write(X_Reg1);
-  Wire.write(X_Reg2);
-  Wire.endTransmission();
-  Wire.requestFrom(0x53, 2);
-  if(Wire.available() <= 2){
-    X0 = Wire.read();
-    X1 = Wire.read();
-  }
-  vals.push_back(X0);
-  vals.push_back(X1);
-
-  return vals;
+  
+  Serial.print("Thigh Roll:"); Serial.println( ADXL345_thigh.RP.roll );
+  Serial.print("Thigh Pitch:"); Serial.println( ADXL345_thigh.RP.pitch );
+  Serial.print("calf Roll:"); Serial.println( ADXL345_calf.RP.roll );
+  Serial.print("calf Pitch:"); Serial.println( ADXL345_calf.RP.pitch );
+  delay(500);
 }
