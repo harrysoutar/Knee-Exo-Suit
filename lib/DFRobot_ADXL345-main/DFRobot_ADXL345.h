@@ -10,7 +10,6 @@
  */
 #include <Arduino.h>
 #include <Wire.h>
-#include <SPI.h>
 
 /* -- ADXL345 addresses --*/
 // ADXL345 address when SDO is connected to HIGH
@@ -715,17 +714,4 @@ class DFRobot_ADXL345_I2C:public DFRobot_ADXL345
   private:
     TwoWire* _pWire;
     uint8_t _I2C_addr;
-};
-
-class DFRobot_ADXL345_SPI : public DFRobot_ADXL345
-{
-  public:
-    DFRobot_ADXL345_SPI(SPIClass *spi = &SPI, uint8_t csPin = 10);
-    bool begin(void);
-  protected:
-    void writeData(uint8_t reg, void *pdata, uint8_t len);
-    int16_t readData(uint8_t reg, uint8_t *data, uint8_t len);
-  private:
-    SPIClass *_pSpi;
-    uint8_t _csPin;
 };

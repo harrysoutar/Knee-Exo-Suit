@@ -3,6 +3,8 @@
 #include "DFRobot_ADXL345.cpp"
 
 //ADXL345 Definitions:
+#define THIGH_ADXL_ADDR 0x53
+#define CALF_ADXL_ADDR 0x1D
 #define X_Reg1 0x32
 #define X_Reg2 0x33
 #define Y_Reg1 0x34
@@ -15,32 +17,33 @@
 int X0;
 int X1;
 
-driver stepper(4, 5, 3, 6, 200);
-DFRobot_ADXL345_I2C ADXL345_thigh(&Wire,0x53);
-DFRobot_ADXL345_I2C ADXL345_calf(&Wire,0x1D);
+String x, y, z;
 
-int accval_thigh[3];
-int accval_calf[3];
+driver stepper(4, 5, 3, 6, 200);
+
+float getWireRead();
 
 
 void setup() {
   Serial.begin(9600);
-  ADXL345_thigh.begin();
-  ADXL345_thigh.powerOn();
-  ADXL345_calf.begin();
-  ADXL345_calf.powerOn();
+  Wire.begin();
 }
 
 void loop() {
-  ADXL345_thigh.readAccel(accval_thigh);
-  ADXL345_calf.readAccel(accval_calf);
-  ADXL345_thigh.RPCalculate(accval_thigh);
-  ADXL345_calf.RPCalculate(accval_calf);
+  Wire.beginTransmission(THIGH_ADXL_ADDR);
+  Wire.write(X_Reg1);
+  Wire.endTransmission(false);
+  Wire.requestFrom(THIGH_ADXL_ADDR, 6, true);
 
-  
-  Serial.print("Thigh Roll:"); Serial.println( ADXL345_thigh.RP.roll );
-  Serial.print("Thigh Pitch:"); Serial.println( ADXL345_thigh.RP.pitch );
-  Serial.print("calf Roll:"); Serial.println( ADXL345_calf.RP.roll );
-  Serial.print("calf Pitch:"); Serial.println( ADXL345_calf.RP.pitch );
-  delay(500);
+  x = getWireRead();
+  y = getWireRead();
+  z = getWireRead();
+
+  Serial.println("X: " + x + " Y: " + y + " Z: " + z);
+  delay(50);
+}
+
+float getWireRead(){
+  float value = Wire.read() | (Wire.read() << 8);
+  return value/256;
 }
